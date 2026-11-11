@@ -34,3 +34,7 @@ Change the port with `AI_MANAGER_PORT` (default 8767). Server log: `~/Library/Ap
 ```bash
 bash uninstall.sh
 ```
+
+## License
+
+MIT. See [LICENSE](LICENSE).
