@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Manager</title>
+<style>
+  :root { --bg: #02070d; }
+  * { box-sizing: border-box; }
+  .hidden { display: none !important; }
+  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
+  #sysClose { display: none; }
+</style>
+<link rel="stylesheet" href="system.css">
+</head>
+<body>
+<button id="sysBtn" type="button" class="hidden" aria-hidden="true" tabindex="-1">SYSTEM</button>
+<div id="sys" class="hidden" role="dialog" aria-modal="true" aria-label="Mac system manager">
+<div class="sysbody"><div class="syshead"><h1><svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v5M12 17.5v5M1.5 12h5M17.5 12h5"/></svg>SYSTEM <span class="live" aria-hidden="true"><i></i>LIVE</span></h1><nav role="tablist" aria-label="System sections"><button role="tab" id="t-mem" aria-controls="mem" aria-selected="true" data-t="mem" class="on">Memory</button><button role="tab" id="t-apps" aria-controls="apps" aria-selected="false" tabindex="-1" data-t="apps">Apps</button><button role="tab" id="t-files" aria-controls="files" aria-selected="false" tabindex="-1" data-t="files">Storage</button><button role="tab" id="t-brew" aria-controls="brew" aria-selected="false" tabindex="-1" data-t="brew">Homebrew</button><button role="tab" id="t-dev" aria-controls="dev" aria-selected="false" tabindex="-1" data-t="dev">Devices</button></nav><button id="sysClose" type="button">CLOSE</button></div>
+<main>
+<section role="tabpanel" aria-labelledby="t-mem" id="mem">
+ <div class="grid" id="cards"><div class="card"><div class="sub">Reading memory, disk and CPU…</div></div></div>
+ <div class="card" id="histcard" style="margin-bottom:16px"><h2>Memory, swap and CPU, last 30 minutes</h2>
+  <svg id="hist" viewBox="0 0 640 150" role="img" aria-label="History chart" style="width:100%;height:150px;display:block"></svg>
+  <div class="sub" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:6px"><span><span class="dot" style="background:var(--acc)"></span>Memory <span class="dot" style="background:var(--warn)"></span>Swap <span class="dot" style="background:var(--ok)"></span>CPU load</span><span id="histnow"></span></div></div>
+ <div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px"><div style="flex:1"><h2 style="margin:0 0 4px">Trash</h2><div id="trashinfo" class="sub">Checking…</div></div><button class="act" id="emptytrash">Empty Trash…</button></div>
+ <div class="card"><h2>Top processes by memory</h2><table id="procs"><tr><td class="sub">Loading processes…</td></tr></table></div>
+</section>
+<section role="tabpanel" aria-labelledby="t-apps" id="apps" class="hidden">
+ <div class="row"><input type="search" id="q" aria-label="Search apps" placeholder="Search apps…"><button class="act" id="rescan" style="flex:none">Rescan</button></div>
+ <div class="beam" id="abeam"></div>
+ <div class="card"><table id="applist"></table></div>
+ <p class="sub">Uninstall moves the app to the Trash, so you can restore it. Apps unused for 6+ months are flagged.</p>
+</section>
+<section role="tabpanel" aria-labelledby="t-files" id="files" class="hidden">
+ <div class="row"><button class="chip" data-go="home">Home</button><button class="chip" data-go="Downloads">Downloads</button><button class="chip" data-go="Documents">Documents</button><button class="chip" data-go="Desktop">Desktop</button><button class="chip" data-go="Movies">Movies</button><button class="chip" data-go="large">Find large files (&gt;100 MB)</button></div>
+ <div class="card" style="margin-bottom:14px"><h2>Duplicate files</h2>
+  <div class="row" style="margin-bottom:8px">
+   <select id="dpath" aria-label="Folder to scan for duplicates"><option value="Downloads">Downloads</option><option value="Documents">Documents</option><option value="Desktop">Desktop</option><option value="Movies">Movies</option><option value="">Whole home folder (slow)</option></select>
+   <select id="dmin" aria-label="Minimum file size"><option value="1">Files &gt; 1 MB</option><option value="10">Files &gt; 10 MB</option><option value="100">Files &gt; 100 MB</option></select>
+   <button class="send" id="dgo" style="margin:0;flex:none">Find duplicates</button>
+  </div>
+  <div class="beam" id="dbeam"></div><div class="sub" id="dstat" aria-live="polite">Finds files with identical contents. Hard links to the same file are not counted as duplicates.</div>
+  <div id="dres"></div></div>
+ <div class="sub" id="fpath" style="margin-bottom:8px"></div>
+ <div class="row">
+  <button class="act" id="fup" style="flex:none">Up one folder</button>
+  <input type="search" id="fq" aria-label="Filter by name" placeholder="Filter by name…">
+  <select id="ftype" aria-label="Show files or folders"><option value="">Files &amp; folders</option><option value="f">Files only</option><option value="d">Folders only</option></select>
+  <select id="fsort" aria-label="Sort by"><option value="size">Sort: size</option><option value="name">Sort: name</option><option value="date">Sort: date modified</option></select>
+  <select id="fmin" aria-label="Minimum size"><option value="0">Any size</option><option value="1e6">&gt; 1 MB</option><option value="1e8">&gt; 100 MB</option><option value="1e9">&gt; 1 GB</option></select>
+  <select id="fage" aria-label="Minimum age"><option value="0">Any age</option><option value="30">Older than 30 days</option><option value="180">Older than 6 months</option><option value="365">Older than 1 year</option></select>
+ </div>
+ <div class="row"><button class="send" id="fdel" style="margin:0;flex:none" disabled>Move selected to Trash</button><span class="sub" id="fsel" style="align-self:center"></span></div>
+ <div class="beam" id="fbeam"></div>
+ <div class="card"><table id="flist"></table></div>
+ <p class="sub">Only items inside your home folder can be managed. Deleting moves items to the Trash (restorable until you empty it). Core folders like Documents and Library are protected.</p>
+</section>
+<section role="tabpanel" aria-labelledby="t-dev" id="dev" class="hidden">
+ <div class="grid" id="devnet"><div class="card"><div class="sub">Reading network…</div></div></div>
+ <div class="card" style="margin-bottom:16px"><h2>Drives</h2><div id="devdrives"><div class="sub">Reading drives…</div></div></div>
+ <div class="grid" id="devother"></div>
+</section>
+<section role="tabpanel" aria-labelledby="t-brew" id="brew" class="hidden"><div class="card"><table id="brewlist"></table></div></section>
+</main></div>
+<div id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgmsg"><div><p id="dlgmsg"></p><div class="btns"><button class="act" id="dno">Cancel</button><button class="send" id="dyes" style="margin:0">Confirm</button></div></div></div><div id="toast" role="status" aria-live="polite"></div>
+</div>
+<script>window.__standalone = true;</script>
+<script src="system.js"></script>
+</body>
+</html>
